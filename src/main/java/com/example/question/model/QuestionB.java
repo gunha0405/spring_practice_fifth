@@ -1,4 +1,4 @@
-package com.example.question;
+package com.example.question.model;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +16,7 @@ import lombok.Setter;
 public class QuestionB {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(length = 200)
     private String subject;

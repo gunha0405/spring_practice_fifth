@@ -1,4 +1,4 @@
-package com.example.question;
+package com.example.question.model;
 
 import java.time.LocalDateTime;
 
