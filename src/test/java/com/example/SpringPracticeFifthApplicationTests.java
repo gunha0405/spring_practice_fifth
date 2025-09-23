@@ -23,7 +23,7 @@ class SpringPracticeFifthApplicationTests {
             String content = "내용무";
             String hashtag = String.format("테스트 데이터입니다:[%03d]", i);
             String keyword = "해시태그";
-            this.questionService.create(subject, content, keyword, hashtag);
+            this.questionService.create(subject, content, keyword, hashtag, null);
         }
     }
 
