@@ -1,22 +1,27 @@
 package com.example.question.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import com.example.answer.model.Answer;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-public class QuestionB {
+public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(length = 200)
     private String subject;
@@ -26,5 +31,11 @@ public class QuestionB {
 
     private LocalDateTime createDate;
     
+    private String keyword;
     private String hashtag;
+    
+    private String tenantId;
+    
+    @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE) 
+    private List<Answer> answerList; 
 }

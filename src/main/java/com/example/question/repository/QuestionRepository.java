@@ -4,10 +4,11 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.question.model.QuestionA;
+import com.example.question.model.Question;
 
-public interface QuestionARepository extends JpaRepository<QuestionA, Long>{
-	QuestionA findBySubject(String subject);
-	QuestionA findBySubjectAndContent(String subject, String content);
-	List<QuestionA> findBySubjectLike(String subject);
+
+public interface QuestionRepository extends JpaRepository<Question, Long>{
+	Question findBySubject(String subject);
+	Question findBySubjectAndContent(String subject, String content);
+	List<Question> findBySubjectLike(String subject);
 }
