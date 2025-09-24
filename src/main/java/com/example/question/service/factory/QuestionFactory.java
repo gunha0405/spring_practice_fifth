@@ -1,0 +1,20 @@
+package com.example.question.service.factory;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.example.question.model.BaseQuestion;
+import com.example.user.model.SiteUser;
+
+public interface QuestionFactory {
+    BaseQuestion create(String subject, String content,
+                        String keyword, String hashtag,
+                        String tenantId, SiteUser user);
+
+    void modify(BaseQuestion question, String subject,
+                String content, String keyword, String hashtag);
+
+    Page<? extends BaseQuestion> search(String subject, String value, Pageable pageable);
+}
