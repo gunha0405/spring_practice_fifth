@@ -22,10 +22,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-public class Question {
+public class QuestionB implements BaseQuestion{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(length = 200)
     private String subject;
@@ -34,20 +34,20 @@ public class Question {
     private String content;
 
     private LocalDateTime createDate;
-    
     private LocalDateTime modifyDate;
-    
-    private String keyword;
-    private String hashtag;
-    
+
+    private String hashtag;   // B 전용 필드
+
     private String tenantId;
-    
-    @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE) 
-    private List<Answer> answerList; 
-    
+
     @ManyToOne
     private SiteUser author;
-    
+
     @ManyToMany
-    Set<SiteUser> voter;
+    private Set<SiteUser> voter;
+    
+    @Override
+    public QuestionType getQuestionType() {
+        return QuestionType.B;
+    }
 }

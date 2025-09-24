@@ -3,6 +3,7 @@ package com.example.question.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -12,64 +13,53 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.Exception.DataNotFoundException;
-import com.example.question.model.Question;
-import com.example.question.repository.QuestionRepository;
+import com.example.question.model.BaseQuestion;
+import com.example.question.repository.QuestionRouter;
+import com.example.question.service.factory.QuestionFactory;
 import com.example.user.model.SiteUser;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class QuestionService {
 
-    private final QuestionRepository questionRepository;
+    private final Map<String, QuestionFactory> factories; // tenantId → Factory 매핑
+    private final QuestionRouter questionRouter;          // Repository 라우터
 
-    public List<Question> getList() {
-        return this.questionRepository.findAll();
-    }
-    
-    public Question getQuestion(Long id) {  
-        Optional<Question> question = this.questionRepository.findById(id);
-        if (question.isPresent()) {
-            return question.get();
-        } else {
-            throw new DataNotFoundException("question not found");
-        }
-    }
-    
-    public void create(String subject, String content, String keyword, String hashtag, SiteUser user) {
-        Question q = new Question();
-        q.setSubject(subject);
-        q.setContent(content);
-        q.setHashtag(hashtag);
-        q.setKeyword(keyword);
-        q.setAuthor(user);
-        q.setCreateDate(LocalDateTime.now());
-        this.questionRepository.save(q);
-    }
-    
-    public Page<Question> getList(int page) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("createDate"));
+    public Page<? extends BaseQuestion> getList(int page, String tenantId) {
+        List<Sort.Order> sorts = List.of(Sort.Order.desc("createDate"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
-        return this.questionRepository.findAll(pageable);
+        return questionRouter.resolve(tenantId).findAll(pageable);
     }
-    
-    public void modify(Question question, String subject, String content, String keyword, String hashtag) {
-        question.setSubject(subject);
-        question.setContent(content);
-        question.setModifyDate(LocalDateTime.now());
-        question.setKeyword(keyword);
-        question.setHashtag(hashtag);
-        this.questionRepository.save(question);
+
+    public BaseQuestion getQuestion(Long id, String tenantId) {
+        return questionRouter.resolve(tenantId).findById(id)
+            .orElseThrow(() -> new DataNotFoundException("question not found"));
     }
-    
-    public void delete(Question question) {
-        this.questionRepository.delete(question);
+
+    public BaseQuestion create(String subject, String content,
+                               String keyword, String hashtag,
+                               String tenantId, SiteUser user) {
+        return factories.get(tenantId).create(subject, content, keyword, hashtag, tenantId, user);
     }
-    
-    public void vote(Question question, SiteUser siteUser) {
+
+    public void modify(BaseQuestion question, String subject,
+                       String content, String keyword, String hashtag) {
+        factories.get(question.getTenantId()).modify(question, subject, content, keyword, hashtag);
+    }
+
+    public void delete(BaseQuestion question) {
+        questionRouter.resolve(question.getTenantId()).delete(question);
+    }
+
+    public void vote(BaseQuestion question, SiteUser siteUser) {
         question.getVoter().add(siteUser);
-        this.questionRepository.save(question);
+        questionRouter.resolve(question.getTenantId()).save(question);
+    }
+
+    public Page<? extends BaseQuestion> search(String subject, String value, String tenantId, int page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Order.desc("createDate")));
+        return factories.get(tenantId).search(subject, value, pageable);
     }
 }

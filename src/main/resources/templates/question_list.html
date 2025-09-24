@@ -1,52 +1,80 @@
 <html layout:decorate="~{layout}">
 <div layout:fragment="content" class="container my-3">
-<div class="container my-3">
-    <table class="table">
-        <thead class="table-dark">
-			<tr class="text-center">
-			    <th>번호</th>
-			    <th style="width:50%">제목</th>
-			    <th>글쓴이</th>
-			    <th>작성일시</th>
-			</tr>
-        </thead>
-        <tbody>
-			<tr class="text-center" th:each="question, loop : ${paging}">
-			    <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>
-			    <td class="text-start">
-			        <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
-			        <span class="text-danger small ms-2" th:if="${#lists.size(question.answerList) > 0}"
-			            th:text="${#lists.size(question.answerList)}">
-			        </span>
-			    </td>
-			    <td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
-			    <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
-			</tr>
-        </tbody>
-    </table>
-	<!-- 페이징처리 시작 -->
-	    <div th:if="${!paging.isEmpty()}">
-	        <ul class="pagination justify-content-center">
-	            <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
-	                <a class="page-link"
-	                    th:href="@{|?page=${paging.number-1}|}">
-	                    <span>이전</span>
-	                </a>
-	            </li>
-	            <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
-				th:if="${page >= paging.number-5 and page <= paging.number+5}"
-	                th:classappend="${page == paging.number} ? 'active'" 
-	                class="page-item">
-	                <a th:text="${page}" class="page-link" th:href="@{|?page=${page}|}"></a>
-	            </li>
-	            <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
-	                <a class="page-link" th:href="@{|?page=${paging.number+1}|}">
-	                    <span>다음</span>
-	                </a>
-	            </li>
-	        </ul>
-	    </div>
-	    <!-- 페이징처리 끝 -->
-	<a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>
+    <div class="container my-3">
+
+        <!-- 🔍 검색 폼 -->
+        <form th:action="@{/question/search}" method="get" class="mb-3 d-flex gap-2">
+            <!-- subject 공통 -->
+            <input type="text" name="subject" class="form-control" placeholder="제목 검색">
+
+            <!-- 고객사별 검색 조건 -->
+            <input type="text" name="value"
+                   th:if="${#authentication.principal.customerId == 'A'}"
+                   class="form-control"
+                   placeholder="키워드 검색 (A 고객사)">
+            <input type="text" name="value"
+                   th:if="${#authentication.principal.customerId == 'B'}"
+                   class="form-control"
+                   placeholder="해시태그 검색 (B 고객사)">
+
+            <button type="submit" class="btn btn-outline-primary">검색</button>
+        </form>
+
+        <!-- 질문 리스트 -->
+        <table class="table">
+            <thead class="table-dark">
+                <tr class="text-center">
+                    <th>번호</th>
+                    <th style="width:50%">제목</th>
+                    <th>글쓴이</th>
+                    <th>작성일시</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 일반 목록 -->
+                <tr class="text-center" th:each="question, loop : ${paging}" th:if="${searchMode == null}">
+                    <td th:text="${paging.totalElements - (paging.number * paging.size) - loop.index}"></td>
+                    <td class="text-start">
+                        <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                        <span class="text-danger small ms-2"
+                              th:if="${answerCounts[question.id] > 0}"
+                              th:text="${answerCounts[question.id]}"></span>
+                    </td>
+                    <td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
+                    <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+                </tr>
+
+                <!-- 검색 결과 -->
+                <tr class="text-center" th:each="question, loop : ${results}" th:if="${searchMode}">
+                    <td>-</td>
+                    <td class="text-start">
+                        <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                    </td>
+                    <td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
+                    <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 페이징처리 (검색 모드 아닐 때만) -->
+        <div th:if="${!paging.isEmpty() and searchMode == null}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${!paging.hasPrevious()} ? 'disabled'">
+                    <a class="page-link" th:href="@{|?page=${paging.number-1}|}"><span>이전</span></a>
+                </li>
+                <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
+                    th:if="${page >= paging.number-5 and page <= paging.number+5}"
+                    th:classappend="${page == paging.number} ? 'active'"
+                    class="page-item">
+                    <a th:text="${page}" class="page-link" th:href="@{|?page=${page}|}"></a>
+                </li>
+                <li class="page-item" th:classappend="${!paging.hasNext()} ? 'disabled'">
+                    <a class="page-link" th:href="@{|?page=${paging.number+1}|}"><span>다음</span></a>
+                </li>
+            </ul>
+        </div>
+
+        <a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>
+    </div>
 </div>
 </html>
