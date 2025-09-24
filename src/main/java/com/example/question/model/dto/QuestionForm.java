@@ -1,6 +1,7 @@
 package com.example.question.model.dto;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import lombok.Getter;
@@ -21,5 +22,8 @@ public class QuestionForm {
 
     // hashtag (B 고객사 전용)
     private String hashtag;
+    
+    @NotNull(message = "카테고리를 선택하세요")
+    private Long categoryId;
 }
 

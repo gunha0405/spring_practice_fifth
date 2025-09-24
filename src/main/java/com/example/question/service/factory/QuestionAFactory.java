@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.example.category.model.Category;
 import com.example.question.model.BaseQuestion;
 import com.example.question.model.QuestionA;
 import com.example.question.repository.QuestionARepository;
@@ -22,13 +23,14 @@ public class QuestionAFactory implements QuestionFactory {
 
     @Override
     public BaseQuestion create(String subject, String content,
-                               String keyword, String hashtag,
+                               String keyword, String hashtag, Category category,
                                String tenantId, SiteUser user) {
         QuestionA q = new QuestionA();
         q.setSubject(subject);
         q.setContent(content);
         q.setKeyword(keyword);   // ✅ A 전용
         q.setAuthor(user);
+        q.setCategory(category);
         q.setTenantId(tenantId);
         q.setCreateDate(LocalDateTime.now());
         return questionARepository.save(q);

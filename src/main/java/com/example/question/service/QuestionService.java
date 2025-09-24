@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.Exception.DataNotFoundException;
+import com.example.category.model.Category;
+import com.example.category.repository.CategoryRepository;
 import com.example.question.model.BaseQuestion;
 import com.example.question.repository.QuestionRouter;
 import com.example.question.service.factory.QuestionFactory;
@@ -28,6 +30,7 @@ public class QuestionService {
 
     private final Map<String, QuestionFactory> factories; // tenantId → Factory 매핑
     private final QuestionRouter questionRouter;          // Repository 라우터
+    private final CategoryRepository categoryRepository;
 
     public Page<? extends BaseQuestion> getList(int page, String tenantId) {
         List<Sort.Order> sorts = List.of(Sort.Order.desc("createDate"));
@@ -41,9 +44,10 @@ public class QuestionService {
     }
 
     public BaseQuestion create(String subject, String content,
-                               String keyword, String hashtag,
+                               String keyword, String hashtag, Long categoryId,
                                String tenantId, SiteUser user) {
-        return factories.get(tenantId).create(subject, content, keyword, hashtag, tenantId, user);
+    	Optional<Category> category = categoryRepository.findById(categoryId);
+        return factories.get(tenantId).create(subject, content, keyword, hashtag, category.get(), tenantId, user);
     }
 
     public void modify(BaseQuestion question, String subject,

@@ -23,6 +23,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.answer.model.Answer;
 import com.example.answer.model.dto.AnswerForm;
 import com.example.answer.service.AnswerService;
+import com.example.category.model.Category;
+import com.example.category.service.CategoryService;
 import com.example.question.model.BaseQuestion;
 import com.example.question.model.QuestionA;
 import com.example.question.model.QuestionB;
@@ -45,6 +47,7 @@ public class QuestionController {
     private final QuestionService questionService;
     private final UserService userService;
     private final AnswerService answerService;
+    private final CategoryService categoryService;
 
     @GetMapping("/list")
     @PreAuthorize("isAuthenticated()")
@@ -95,7 +98,9 @@ public class QuestionController {
     public String showCreateForm(@AuthenticationPrincipal CustomUserDetails userDetails,
                                  Model model) {
     	String customerId = userDetails.getCustomerId();
+    	List<Category> categories = categoryService.getAllCategories();
         model.addAttribute("questionForm", new QuestionForm());
+        model.addAttribute("categories", categories);
         model.addAttribute("customerId", customerId); // 뷰에서 사용할 수 있도록 추가
         return "question_form";
     }
@@ -117,6 +122,7 @@ public class QuestionController {
                 questionForm.getContent(),
                 questionForm.getKeyword(),
                 questionForm.getHashtag(),
+                questionForm.getCategoryId(),
                 tenantId,
                 siteUser
         );

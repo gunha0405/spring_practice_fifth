@@ -5,12 +5,13 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.example.category.model.Category;
 import com.example.question.model.BaseQuestion;
 import com.example.user.model.SiteUser;
 
 public interface QuestionFactory {
     BaseQuestion create(String subject, String content,
-                        String keyword, String hashtag,
+                        String keyword, String hashtag, Category category,
                         String tenantId, SiteUser user);
 
     void modify(BaseQuestion question, String subject,

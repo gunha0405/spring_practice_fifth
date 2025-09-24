@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.example.answer.model.Answer;
+import com.example.category.model.Category;
 import com.example.comment.model.Comment;
 import com.example.user.model.SiteUser;
 
@@ -49,6 +50,9 @@ public class QuestionA implements BaseQuestion{
     
     @OneToMany(mappedBy = "questionA")
     private List<Comment> commentList;
+    
+    @ManyToOne
+    private Category category;
     
     @Override
     public QuestionType getQuestionType() {
