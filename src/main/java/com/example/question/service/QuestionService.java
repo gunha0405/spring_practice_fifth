@@ -19,7 +19,9 @@ import com.example.question.service.factory.QuestionFactory;
 import com.example.user.model.SiteUser;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
@@ -59,6 +61,7 @@ public class QuestionService {
     }
 
     public Page<? extends BaseQuestion> search(String subject, String value, String tenantId, int page) {
+
         Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Order.desc("createDate")));
         return factories.get(tenantId).search(subject, value, pageable);
     }

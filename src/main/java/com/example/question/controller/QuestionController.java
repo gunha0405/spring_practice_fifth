@@ -34,7 +34,9 @@ import com.example.user.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/question")
@@ -77,7 +79,7 @@ public class QuestionController {
         BaseQuestion question = this.questionService.getQuestion(id, customerId);
 
         List<Answer> answers = this.answerService.getAnswersByQuestion(id, customerId);
-
+        model.addAttribute("customerId", customerId);
         model.addAttribute("question", question);
         model.addAttribute("answers", answers);
 
@@ -161,22 +163,32 @@ public class QuestionController {
     }
 
     @GetMapping("/search")
-    public String searchQuestions(@RequestParam String subject,
-                                  @RequestParam String value,
-                                  @RequestParam(value="page", defaultValue="0") int page,
+    public String searchQuestions(@RequestParam("subject") String subject,
+                                  @RequestParam("value") String value,
+                                  @RequestParam(value = "page", defaultValue = "0") int page,
                                   @AuthenticationPrincipal CustomUserDetails userDetails,
                                   Model model) {
 
         String customerId = userDetails.getCustomerId();
+
         Page<? extends BaseQuestion> paging = questionService.search(subject, value, customerId, page);
 
+        Map<Long, Integer> answerCounts = paging.getContent().stream()
+            .collect(Collectors.toMap(
+                BaseQuestion::getId,
+                q -> answerService.countByQuestion(q.getId(), q.getQuestionType())
+            ));
+
         model.addAttribute("paging", paging);
+        model.addAttribute("answerCounts", answerCounts);
         model.addAttribute("searchMode", true);
         model.addAttribute("subject", subject);
         model.addAttribute("value", value);
 
         return "question_list";
     }
+
+
     
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/vote/{id}")
