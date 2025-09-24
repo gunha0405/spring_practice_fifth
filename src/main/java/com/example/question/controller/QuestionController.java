@@ -71,20 +71,24 @@ public class QuestionController {
     @PreAuthorize("isAuthenticated()")
     public String detail(Model model,
                          @PathVariable("id") Long id,
+                         @RequestParam(value = "page", defaultValue = "0") int page,
+                         @RequestParam(value = "sort", defaultValue = "latest") String sort,
                          @AuthenticationPrincipal CustomUserDetails userDetails,
                          AnswerForm answerForm) {
 
         String customerId = userDetails.getCustomerId();
-
         BaseQuestion question = this.questionService.getQuestion(id, customerId);
 
-        List<Answer> answers = this.answerService.getAnswersByQuestion(id, customerId);
+        Page<Answer> answers = this.answerService.getAnswersByQuestion(id, customerId, page, sort);
+
         model.addAttribute("customerId", customerId);
         model.addAttribute("question", question);
         model.addAttribute("answers", answers);
+        model.addAttribute("sort", sort);
 
         return "question_detail";
     }
+
 
     
     @GetMapping("/create")

@@ -53,12 +53,23 @@
             </div>
         </div>
 
+        <!-- 답변 정렬 버튼 -->
+        <div class="mb-3">
+            <a th:href="@{|/question/detail/${question.id}?page=0&sort=latest|}"
+               class="btn btn-sm btn-outline-primary"
+               th:classappend="${sort == 'latest'} ? ' active'">최신순</a>
+
+            <a th:href="@{|/question/detail/${question.id}?page=0&sort=recommend|}"
+               class="btn btn-sm btn-outline-primary"
+               th:classappend="${sort == 'recommend'} ? ' active'">추천순</a>
+        </div>
+
         <!-- 답변의 갯수 표시 -->
         <h5 class="border-bottom my-3 py-2"
-            th:text="|${#lists.size(answers)}개의 답변이 있습니다.|"></h5>
+            th:text="|${answers.totalElements}개의 답변이 있습니다.|"></h5>
 
         <!-- 답변 반복 시작 -->
-        <div class="card my-3" th:each="answer : ${answers}">
+        <div class="card my-3" th:each="answer : ${answers.content}">
             <a th:id="|answer_${answer.id}|"></a>
             <div class="card-body">
                 <div class="card-text" style="white-space: pre-line;" th:text="${answer.content}"></div>
@@ -94,6 +105,26 @@
             </div>
         </div>
         <!-- 답변 반복 끝 -->
+
+        <!-- 페이지네이션 -->
+        <div th:if="${answers.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${answers.first} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{|/question/detail/${question.id}?page=${answers.number - 1}&sort=${sort}|}">이전</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, answers.totalPages - 1)}"
+                    th:classappend="${i == answers.number} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{|/question/detail/${question.id}?page=${i}&sort=${sort}|}"
+                       th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${answers.last} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{|/question/detail/${question.id}?page=${answers.number + 1}&sort=${sort}|}">다음</a>
+                </li>
+            </ul>
+        </div>
 
         <!-- 답변 작성 -->
         <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
