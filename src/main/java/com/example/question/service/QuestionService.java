@@ -32,10 +32,14 @@ public class QuestionService {
     private final QuestionRouter questionRouter;          // Repository 라우터
     private final CategoryRepository categoryRepository;
 
-    public Page<? extends BaseQuestion> getList(int page, String tenantId) {
-        List<Sort.Order> sorts = List.of(Sort.Order.desc("createDate"));
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
-        return questionRouter.resolve(tenantId).findAll(pageable);
+    public Page<? extends BaseQuestion> getList(int page, String filter, String tenantId) {
+        Pageable pageable = PageRequest.of(page, 10);
+
+        return switch (filter) {
+            case "answer" -> factories.get(tenantId).getListOrderByLatestAnswer(pageable);
+            case "comment" -> factories.get(tenantId).getListOrderByLatestComment(pageable);
+            default -> factories.get(tenantId).getListOrderByLatestQuestion(pageable);
+        };
     }
 
     public BaseQuestion getQuestion(Long id, String tenantId) {

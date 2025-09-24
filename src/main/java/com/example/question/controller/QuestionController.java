@@ -52,12 +52,12 @@ public class QuestionController {
     @GetMapping("/list")
     @PreAuthorize("isAuthenticated()")
     public String list(Model model,
-                       @RequestParam(value="page", defaultValue="0") int page,
+                       @RequestParam(value = "page", defaultValue = "0") int page,
+                       @RequestParam(value = "filter", defaultValue = "latest") String filter,
                        @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         String tenantId = userDetails.getCustomerId();
-        Page<? extends BaseQuestion> paging = this.questionService.getList(page, tenantId);
-
+        Page<? extends BaseQuestion> paging = this.questionService.getList(page, filter, tenantId);
         Map<Long, Integer> answerCounts = paging.getContent().stream()
             .collect(Collectors.toMap(
                 BaseQuestion::getId,
@@ -65,10 +65,12 @@ public class QuestionController {
             ));
 
         model.addAttribute("paging", paging);
+        model.addAttribute("filter", filter);
         model.addAttribute("answerCounts", answerCounts);
 
         return "question_list";
     }
+
 
     @GetMapping("/detail/{id}")
     @PreAuthorize("isAuthenticated()")

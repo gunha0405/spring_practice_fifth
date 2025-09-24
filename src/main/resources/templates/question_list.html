@@ -20,6 +20,19 @@
             </div>
         </form>
 
+        <!-- 필터 버튼 -->
+        <div class="mb-3 d-flex justify-content-end">
+            <a class="btn btn-outline-primary me-2"
+               th:classappend="${filter == 'latest'} ? 'active'"
+               th:href="@{|/question/list?filter=latest|}">최신 질문순</a>
+            <a class="btn btn-outline-primary me-2"
+               th:classappend="${filter == 'answer'} ? 'active'"
+               th:href="@{|/question/list?filter=answer|}">최근 답변순</a>
+            <a class="btn btn-outline-primary"
+               th:classappend="${filter == 'comment'} ? 'active'"
+               th:href="@{|/question/list?filter=comment|}">최근 댓글순</a>
+        </div>
+
         <!-- 질문 리스트 -->
         <table class="table">
             <thead class="table-dark">
@@ -57,13 +70,7 @@
             <!-- 이전 -->
             <li class="page-item" th:classappend="${!paging.hasPrevious()} ? 'disabled'">
                 <a class="page-link"
-                   th:if="${searchMode}"
-                   th:href="@{|/question/search?page=${paging.number-1}&subject=${subject}&value=${value}|}">
-                    이전
-                </a>
-                <a class="page-link"
-                   th:unless="${searchMode}"
-                   th:href="@{|/question/list?page=${paging.number-1}|}">
+                   th:href="@{|/question/list?page=${paging.number-1}&filter=${filter}|}">
                     이전
                 </a>
             </li>
@@ -74,25 +81,14 @@
                 th:classappend="${page == paging.number} ? 'active'"
                 class="page-item">
                 <a class="page-link"
-                   th:if="${searchMode}"
-                   th:href="@{|/question/search?page=${page}&subject=${subject}&value=${value}|}"
-                   th:text="${page}"></a>
-                <a class="page-link"
-                   th:unless="${searchMode}"
-                   th:href="@{|/question/list?page=${page}|}"
+                   th:href="@{|/question/list?page=${page}&filter=${filter}|}"
                    th:text="${page}"></a>
             </li>
 
             <!-- 다음 -->
             <li class="page-item" th:classappend="${!paging.hasNext()} ? 'disabled'">
                 <a class="page-link"
-                   th:if="${searchMode}"
-                   th:href="@{|/question/search?page=${paging.number+1}&subject=${subject}&value=${value}|}">
-                    다음
-                </a>
-                <a class="page-link"
-                   th:unless="${searchMode}"
-                   th:href="@{|/question/list?page=${paging.number+1}|}">
+                   th:href="@{|/question/list?page=${paging.number+1}&filter=${filter}|}">
                     다음
                 </a>
             </li>

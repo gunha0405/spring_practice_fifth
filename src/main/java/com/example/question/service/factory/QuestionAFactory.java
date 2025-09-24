@@ -57,5 +57,20 @@ public class QuestionAFactory implements QuestionFactory {
     public Page<QuestionA> getUserQuestions(String username, Pageable pageable) {
         return questionARepository.findByAuthorUsername(username, pageable);
     }
+    
+    @Override
+    public Page<QuestionA> getListOrderByLatestQuestion(Pageable pageable) {
+        return questionARepository.findAllByOrderByCreateDateDesc(pageable);
+    }
+
+    @Override
+    public Page<QuestionA> getListOrderByLatestAnswer(Pageable pageable) {
+        return questionARepository.findAllOrderByLatestAnswer(pageable);
+    }
+
+    @Override
+    public Page<QuestionA> getListOrderByLatestComment(Pageable pageable) {
+        return questionARepository.findAllOrderByLatestComment(pageable);
+    }
 }
 

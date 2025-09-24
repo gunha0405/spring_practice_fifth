@@ -20,5 +20,9 @@ public interface QuestionFactory {
     Page<? extends BaseQuestion> search(String subject, String value, Pageable pageable);
     
     Page<? extends BaseQuestion> getUserQuestions(String username, Pageable pageable);
+    
+    Page<? extends BaseQuestion> getListOrderByLatestQuestion(Pageable pageable);
+    Page<? extends BaseQuestion> getListOrderByLatestAnswer(Pageable pageable);
+    Page<? extends BaseQuestion> getListOrderByLatestComment(Pageable pageable);
 
 }

@@ -6,7 +6,9 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import com.example.question.model.QuestionA;
 import com.example.question.model.QuestionB;
 
 public interface QuestionBRepository extends JpaRepository<QuestionB, Long> {
@@ -27,4 +29,25 @@ public interface QuestionBRepository extends JpaRepository<QuestionB, Long> {
     Page<QuestionB> findBySubjectOrHashtag(String subject, String hashtag, Pageable pageable);
 
     Page<QuestionB> findByAuthorUsername(String username, Pageable pageable);
+    
+    Page<QuestionB> findAllByOrderByCreateDateDesc(Pageable pageable);
+
+
+    @Query(value = "SELECT q.* " +
+            "FROM questionB q " +
+            "LEFT JOIN answer a ON q.id = a.question_id AND a.question_type = 'B' " +
+            "GROUP BY q.id " +
+            "ORDER BY MAX(a.create_date) DESC",
+            countQuery = "SELECT COUNT(*) FROM question_b",
+            nativeQuery = true)
+    Page<QuestionB> findAllOrderByLatestAnswer(Pageable pageable);
+
+    @Query(value = "SELECT q.* " +
+            "FROM questionB q " +
+            "LEFT JOIN comment c ON q.id = c.questionB_id " +
+            "GROUP BY q.id " +
+            "ORDER BY MAX(c.create_date) DESC",
+            countQuery = "SELECT COUNT(*) FROM questionB",
+            nativeQuery = true)
+	Page<QuestionB> findAllOrderByLatestComment(Pageable pageable);
 }
