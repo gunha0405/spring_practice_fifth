@@ -3,6 +3,10 @@ package com.example.comment.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.Exception.DataNotFoundException;
@@ -77,5 +81,10 @@ public class CommentService {
         Answer answer = answerRepository.findById(answerId)
                 .orElseThrow(() -> new DataNotFoundException("Answer not found"));
         return answer.getQuestionId(); 
+    }
+    
+    public Page<Comment> getUserComments(String username, int page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Order.desc("createDate")));
+        return commentRepository.findByAuthorUsername(username, pageable);
     }
 }

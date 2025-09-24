@@ -72,5 +72,10 @@ public class AnswerService {
     public Integer countByQuestion(Long questionId, QuestionType questionType) {
         return answerRepository.countByQuestionIdAndQuestionType(questionId, questionType);
     }
+    
+    public Page<Answer> getUserAnswers(String username, int page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Order.desc("createDate")));
+        return answerRepository.findByAuthorUsername(username, pageable);
+    }
 
 }

@@ -25,4 +25,6 @@ public interface QuestionBRepository extends JpaRepository<QuestionB, Long> {
 
     // B 고객사 전용
     Page<QuestionB> findBySubjectOrHashtag(String subject, String hashtag, Pageable pageable);
+
+    Page<QuestionB> findByAuthorUsername(String username, Pageable pageable);
 }

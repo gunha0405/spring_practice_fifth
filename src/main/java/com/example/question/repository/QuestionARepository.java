@@ -25,5 +25,8 @@ public interface QuestionARepository extends JpaRepository<QuestionA, Long> {
 
     // A 고객사 전용
     Page<QuestionA> findBySubjectAndKeyword(String subject, String keyword, Pageable pageable);
+    
+    Page<QuestionA> findByAuthorUsername(String username, Pageable pageable);
+    
 }
 

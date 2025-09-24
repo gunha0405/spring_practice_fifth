@@ -30,4 +30,6 @@ public interface AnswerRepository extends JpaRepository<Answer, Long>{
     Page<Answer> findRecommendedAnswers(@Param("questionId") Long questionId,
                                         @Param("questionType") QuestionType questionType,
                                         Pageable pageable);
+    
+    Page<Answer> findByAuthorUsername(String username, Pageable pageable);
 }

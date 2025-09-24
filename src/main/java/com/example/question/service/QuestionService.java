@@ -69,4 +69,9 @@ public class QuestionService {
         Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Order.desc("createDate")));
         return factories.get(tenantId).search(subject, value, pageable);
     }
+    
+    public Page<? extends BaseQuestion> getUserQuestions(String username, int page, String tenantId) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Order.desc("createDate")));
+        return factories.get(tenantId).getUserQuestions(username, pageable);
+    }
 }

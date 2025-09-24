@@ -52,5 +52,10 @@ public class QuestionAFactory implements QuestionFactory {
     public Page<QuestionA> search(String subject, String value, Pageable pageable) {
         return questionARepository.findBySubjectAndKeyword(subject, value, pageable);
     }
+    
+    @Override
+    public Page<QuestionA> getUserQuestions(String username, Pageable pageable) {
+        return questionARepository.findByAuthorUsername(username, pageable);
+    }
 }
 

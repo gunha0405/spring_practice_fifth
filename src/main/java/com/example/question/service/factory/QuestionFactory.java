@@ -18,4 +18,7 @@ public interface QuestionFactory {
                 String content, String keyword, String hashtag);
 
     Page<? extends BaseQuestion> search(String subject, String value, Pageable pageable);
+    
+    Page<? extends BaseQuestion> getUserQuestions(String username, Pageable pageable);
+
 }
