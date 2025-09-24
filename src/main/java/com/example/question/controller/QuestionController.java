@@ -23,6 +23,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.answer.model.Answer;
 import com.example.answer.model.dto.AnswerForm;
 import com.example.answer.service.AnswerService;
+import com.example.category.model.Category;
+import com.example.category.service.CategoryService;
 import com.example.question.model.BaseQuestion;
 import com.example.question.model.QuestionA;
 import com.example.question.model.QuestionB;
@@ -34,7 +36,9 @@ import com.example.user.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/question")
@@ -43,16 +47,17 @@ public class QuestionController {
     private final QuestionService questionService;
     private final UserService userService;
     private final AnswerService answerService;
+    private final CategoryService categoryService;
 
     @GetMapping("/list")
     @PreAuthorize("isAuthenticated()")
     public String list(Model model,
-                       @RequestParam(value="page", defaultValue="0") int page,
+                       @RequestParam(value = "page", defaultValue = "0") int page,
+                       @RequestParam(value = "filter", defaultValue = "latest") String filter,
                        @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         String tenantId = userDetails.getCustomerId();
-        Page<? extends BaseQuestion> paging = this.questionService.getList(page, tenantId);
-
+        Page<? extends BaseQuestion> paging = this.questionService.getList(page, filter, tenantId);
         Map<Long, Integer> answerCounts = paging.getContent().stream()
             .collect(Collectors.toMap(
                 BaseQuestion::getId,
@@ -60,36 +65,44 @@ public class QuestionController {
             ));
 
         model.addAttribute("paging", paging);
+        model.addAttribute("filter", filter);
         model.addAttribute("answerCounts", answerCounts);
 
         return "question_list";
     }
 
+
     @GetMapping("/detail/{id}")
     @PreAuthorize("isAuthenticated()")
     public String detail(Model model,
                          @PathVariable("id") Long id,
+                         @RequestParam(value = "page", defaultValue = "0") int page,
+                         @RequestParam(value = "sort", defaultValue = "latest") String sort,
                          @AuthenticationPrincipal CustomUserDetails userDetails,
                          AnswerForm answerForm) {
 
         String customerId = userDetails.getCustomerId();
-
         BaseQuestion question = this.questionService.getQuestion(id, customerId);
 
-        List<Answer> answers = this.answerService.getAnswersByQuestion(id, customerId);
+        Page<Answer> answers = this.answerService.getAnswersByQuestion(id, customerId, page, sort);
 
+        model.addAttribute("customerId", customerId);
         model.addAttribute("question", question);
         model.addAttribute("answers", answers);
+        model.addAttribute("sort", sort);
 
         return "question_detail";
     }
+
 
     
     @GetMapping("/create")
     public String showCreateForm(@AuthenticationPrincipal CustomUserDetails userDetails,
                                  Model model) {
     	String customerId = userDetails.getCustomerId();
+    	List<Category> categories = categoryService.getAllCategories();
         model.addAttribute("questionForm", new QuestionForm());
+        model.addAttribute("categories", categories);
         model.addAttribute("customerId", customerId); // 뷰에서 사용할 수 있도록 추가
         return "question_form";
     }
@@ -111,6 +124,7 @@ public class QuestionController {
                 questionForm.getContent(),
                 questionForm.getKeyword(),
                 questionForm.getHashtag(),
+                questionForm.getCategoryId(),
                 tenantId,
                 siteUser
         );
@@ -161,22 +175,32 @@ public class QuestionController {
     }
 
     @GetMapping("/search")
-    public String searchQuestions(@RequestParam String subject,
-                                  @RequestParam String value,
-                                  @RequestParam(value="page", defaultValue="0") int page,
+    public String searchQuestions(@RequestParam("subject") String subject,
+                                  @RequestParam("value") String value,
+                                  @RequestParam(value = "page", defaultValue = "0") int page,
                                   @AuthenticationPrincipal CustomUserDetails userDetails,
                                   Model model) {
 
         String customerId = userDetails.getCustomerId();
+
         Page<? extends BaseQuestion> paging = questionService.search(subject, value, customerId, page);
 
+        Map<Long, Integer> answerCounts = paging.getContent().stream()
+            .collect(Collectors.toMap(
+                BaseQuestion::getId,
+                q -> answerService.countByQuestion(q.getId(), q.getQuestionType())
+            ));
+
         model.addAttribute("paging", paging);
+        model.addAttribute("answerCounts", answerCounts);
         model.addAttribute("searchMode", true);
         model.addAttribute("subject", subject);
         model.addAttribute("value", value);
 
         return "question_list";
     }
+
+
     
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/vote/{id}")
