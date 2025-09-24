@@ -41,6 +41,9 @@ public class QuestionB implements BaseQuestion{
     private String hashtag;   // B 전용 필드
 
     private String tenantId;
+    
+    @Column(columnDefinition = "INT NOT NULL DEFAULT 0")
+    private int viewCount;
 
     @ManyToOne
     private SiteUser author;

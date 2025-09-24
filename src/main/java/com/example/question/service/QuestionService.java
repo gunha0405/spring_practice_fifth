@@ -43,8 +43,13 @@ public class QuestionService {
     }
 
     public BaseQuestion getQuestion(Long id, String tenantId) {
-        return questionRouter.resolve(tenantId).findById(id)
-            .orElseThrow(() -> new DataNotFoundException("question not found"));
+    	BaseQuestion question = questionRouter.resolve(tenantId).findById(id)
+    	        .orElseThrow(() -> new DataNotFoundException("question not found"));
+
+    	    question.setViewCount(question.getViewCount() + 1);
+    	    questionRouter.resolve(tenantId).save(question);
+
+    	    return question;
     }
 
     public BaseQuestion create(String subject, String content,

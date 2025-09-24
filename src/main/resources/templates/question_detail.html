@@ -7,7 +7,12 @@
         <div class="card my-3">
             <div class="card-body">
                 <div class="card-text" style="white-space: pre-line;" th:text="${question.content}"></div>
-				<div class="card-text">카테고리: <span th:text="${question.category?.name ?: '없음'}"></span></div>
+				<div class="badge bg-light text-dark p-2 text-start">
+								<div class="card-text">조회수: <span th:text="${question.viewCount}"></span></div>
+								</div>
+								<div class="badge bg-light text-dark p-2 text-start">
+								<div class="card-text">카테고리: <span th:text="${question.category?.name ?: '없음'}"></span></div>
+								</div>
 					<!-- keyword & hashtag -->
                 <div class="mt-3">
                     <!-- A 고객사 -->

@@ -41,6 +41,9 @@ public class QuestionA implements BaseQuestion{
     private String keyword;  
 
     private String tenantId; 
+    
+    @Column(columnDefinition = "INT NOT NULL DEFAULT 0")
+    private int viewCount;
 
     @ManyToOne
     private SiteUser author;
