@@ -28,7 +28,7 @@ public class QuestionAFactory implements QuestionFactory {
         QuestionA q = new QuestionA();
         q.setSubject(subject);
         q.setContent(content);
-        q.setKeyword(keyword);   // ✅ A 전용
+        q.setKeyword(keyword);   // A 전용
         q.setAuthor(user);
         q.setCategory(category);
         q.setTenantId(tenantId);
