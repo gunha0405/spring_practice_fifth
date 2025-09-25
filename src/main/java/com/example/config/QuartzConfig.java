@@ -1,5 +1,6 @@
 package com.example.config;
 
+import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.SimpleScheduleBuilder;
@@ -8,27 +9,29 @@ import org.quartz.TriggerBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.example.scheduler.MyJob;
+import com.example.scheduler.QuestionInsertJob;
 
 @Configuration
 public class QuartzConfig {
-	@Bean
-    public JobDetail myJobDetail() {
-        return JobBuilder.newJob(MyJob.class)
-                .withIdentity("myJob", "group1")
-                .storeDurably() 
+    
+    @Bean
+    public JobDetail questionInsertJobDetail() {
+        JobDetail jobDetail = JobBuilder.newJob(QuestionInsertJob.class)
+                .withIdentity("questionInsertJob", "systemTasks")
+                .storeDurably()
                 .build();
+
+        jobDetail.getJobDataMap().put("lastTarget", "B");
+
+        return jobDetail;
     }
 
     @Bean
-    public Trigger myJobTrigger(JobDetail myJobDetail) {
+    public Trigger questionInsertTrigger(JobDetail questionInsertJobDetail) {
         return TriggerBuilder.newTrigger()
-                .forJob(myJobDetail)
-                .withIdentity("myTrigger", "group1")
-                .startNow()
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInSeconds(10) // 10초마다 실행
-                        .repeatForever())
+                .forJob(questionInsertJobDetail)
+                .withIdentity("questionInsertTrigger", "systemTasks")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * * * ?")) // 1분마다
                 .build();
     }
 }
