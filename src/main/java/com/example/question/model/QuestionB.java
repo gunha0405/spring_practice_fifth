@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.example.answer.model.Answer;
+import com.example.category.model.Category;
+import com.example.comment.model.Comment;
 import com.example.user.model.SiteUser;
 
 import jakarta.persistence.CascadeType;
@@ -39,12 +41,21 @@ public class QuestionB implements BaseQuestion{
     private String hashtag;   // B 전용 필드
 
     private String tenantId;
+    
+    @Column(columnDefinition = "INT NOT NULL DEFAULT 0")
+    private int viewCount;
 
     @ManyToOne
     private SiteUser author;
 
     @ManyToMany
     private Set<SiteUser> voter;
+    
+    @OneToMany(mappedBy = "questionB")
+    private List<Comment> commentList;
+    
+    @ManyToOne
+    private Category category;
     
     @Override
     public QuestionType getQuestionType() {

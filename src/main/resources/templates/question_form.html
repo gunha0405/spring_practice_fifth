@@ -19,6 +19,18 @@
             <textarea th:field="*{content}" class="form-control" rows="10"></textarea>
         </div>
 
+        <!-- 카테고리 -->
+        <div class="mb-3">
+            <label for="category" class="form-label">카테고리</label>
+            <select th:field="*{categoryId}" class="form-select">
+                <option value="" disabled selected>카테고리 선택</option>
+                <option th:each="cat : ${categories}" 
+                        th:value="${cat.id}" 
+                        th:text="${cat.name}">
+                </option>
+            </select>
+        </div>
+
         <!-- keyword (A 고객사만) -->
         <div class="mb-3" th:if="${customerId == 'A'}">
             <label for="keyword" class="form-label">키워드</label>

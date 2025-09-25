@@ -2,77 +2,100 @@
 <div layout:fragment="content" class="container my-3">
     <div class="container my-3">
 
-        <!-- 🔍 검색 폼 -->
-        <form th:action="@{/question/search}" method="get" class="mb-3 d-flex gap-2">
-            <!-- subject 공통 -->
-            <input type="text" name="subject" class="form-control" placeholder="제목 검색">
-
-            <!-- 고객사별 검색 조건 -->
-            <input type="text" name="value"
-                   th:if="${#authentication.principal.customerId == 'A'}"
-                   class="form-control"
-                   placeholder="키워드 검색 (A 고객사)">
-            <input type="text" name="value"
-                   th:if="${#authentication.principal.customerId == 'B'}"
-                   class="form-control"
-                   placeholder="해시태그 검색 (B 고객사)">
-
-            <button type="submit" class="btn btn-outline-primary">검색</button>
+        <!-- 검색 폼 -->
+        <form th:action="@{/question/search}" method="get" class="mb-3">
+            <div class="row g-2">
+                <div class="col-auto">
+                    <input type="text" name="subject" class="form-control" placeholder="제목 입력"
+                           th:value="${subject}">
+                </div>
+                <div class="col-auto">
+                    <input type="text" name="value" class="form-control"
+                           th:value="${value}"
+                           th:placeholder="${#authentication.principal.customerId == 'A' ? '키워드 입력' : '해시태그 입력'}">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-primary">검색</button>
+                </div>
+            </div>
         </form>
+
+        <!-- 필터 버튼 -->
+        <div class="mb-3 d-flex justify-content-end">
+            <a class="btn btn-outline-primary me-2"
+               th:classappend="${filter == 'latest'} ? 'active'"
+               th:href="@{|/question/list?filter=latest|}">최신 질문순</a>
+            <a class="btn btn-outline-primary me-2"
+               th:classappend="${filter == 'answer'} ? 'active'"
+               th:href="@{|/question/list?filter=answer|}">최근 답변순</a>
+            <a class="btn btn-outline-primary"
+               th:classappend="${filter == 'comment'} ? 'active'"
+               th:href="@{|/question/list?filter=comment|}">최근 댓글순</a>
+        </div>
 
         <!-- 질문 리스트 -->
         <table class="table">
             <thead class="table-dark">
-                <tr class="text-center">
-                    <th>번호</th>
-                    <th style="width:50%">제목</th>
-                    <th>글쓴이</th>
-                    <th>작성일시</th>
-                </tr>
+            <tr class="text-center">
+                <th>번호</th>
+                <th style="width:50%">제목</th>
+                <th>글쓴이</th>
+                <th>작성일시</th>
+				<th>조회수</th>
+            </tr>
             </thead>
             <tbody>
-                <!-- 일반 목록 -->
-                <tr class="text-center" th:each="question, loop : ${paging}" th:if="${searchMode == null}">
-                    <td th:text="${paging.totalElements - (paging.number * paging.size) - loop.index}"></td>
-                    <td class="text-start">
-                        <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
-                        <span class="text-danger small ms-2"
-                              th:if="${answerCounts[question.id] > 0}"
-                              th:text="${answerCounts[question.id]}"></span>
-                    </td>
-                    <td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
-                    <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
-                </tr>
+            <tr class="text-center" th:each="question, loop : ${paging}">
+                <!-- 번호 -->
+                <td th:text="${paging.totalElements - (paging.number * paging.size) - loop.index}"></td>
 
-                <!-- 검색 결과 -->
-                <tr class="text-center" th:each="question, loop : ${results}" th:if="${searchMode}">
-                    <td>-</td>
-                    <td class="text-start">
-                        <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
-                    </td>
-                    <td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
-                    <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
-                </tr>
+                <!-- 제목 -->
+                <td class="text-start">
+                    <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                    <span class="text-danger small ms-2"
+                          th:if="${answerCounts[question.id] > 0}"
+                          th:text="${answerCounts[question.id]}"></span>
+                </td>
+
+                <!-- 글쓴이 -->
+                <td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
+
+                <!-- 작성일 -->
+                <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+				
+				<td><span th:text="${question.viewCount}"></span></td>
+            </tr>
             </tbody>
         </table>
 
-        <!-- 페이징처리 (검색 모드 아닐 때만) -->
-        <div th:if="${!paging.isEmpty() and searchMode == null}">
-            <ul class="pagination justify-content-center">
-                <li class="page-item" th:classappend="${!paging.hasPrevious()} ? 'disabled'">
-                    <a class="page-link" th:href="@{|?page=${paging.number-1}|}"><span>이전</span></a>
-                </li>
-                <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
-                    th:if="${page >= paging.number-5 and page <= paging.number+5}"
-                    th:classappend="${page == paging.number} ? 'active'"
-                    class="page-item">
-                    <a th:text="${page}" class="page-link" th:href="@{|?page=${page}|}"></a>
-                </li>
-                <li class="page-item" th:classappend="${!paging.hasNext()} ? 'disabled'">
-                    <a class="page-link" th:href="@{|?page=${paging.number+1}|}"><span>다음</span></a>
-                </li>
-            </ul>
-        </div>
+        <!-- 페이징 처리 -->
+        <ul class="pagination justify-content-center">
+            <!-- 이전 -->
+            <li class="page-item" th:classappend="${!paging.hasPrevious()} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{|/question/list?page=${paging.number-1}&filter=${filter}|}">
+                    이전
+                </a>
+            </li>
+
+            <!-- 페이지 번호 -->
+            <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
+                th:if="${page >= paging.number-5 and page <= paging.number+5}"
+                th:classappend="${page == paging.number} ? 'active'"
+                class="page-item">
+                <a class="page-link"
+                   th:href="@{|/question/list?page=${page}&filter=${filter}|}"
+                   th:text="${page}"></a>
+            </li>
+
+            <!-- 다음 -->
+            <li class="page-item" th:classappend="${!paging.hasNext()} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{|/question/list?page=${paging.number+1}&filter=${filter}|}">
+                    다음
+                </a>
+            </li>
+        </ul>
 
         <a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>
     </div>

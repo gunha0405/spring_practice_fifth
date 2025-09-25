@@ -32,6 +32,8 @@ dependencies {
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:3.5.5'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	runtimeOnly 'com.h2database:h2'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

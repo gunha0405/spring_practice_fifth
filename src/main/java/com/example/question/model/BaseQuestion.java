@@ -10,6 +10,7 @@ public interface BaseQuestion {
     String getSubject();
     String getContent();
     String getTenantId();
+    int getViewCount();
     LocalDateTime getCreateDate();
     LocalDateTime getModifyDate();
     SiteUser getAuthor();
@@ -23,4 +24,5 @@ public interface BaseQuestion {
     void setTenantId(String tenantId);
     void setCreateDate(LocalDateTime createDate);
     void setModifyDate(LocalDateTime modifyDate);
+	void setViewCount(int viewCount);
 }

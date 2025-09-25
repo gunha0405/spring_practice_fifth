@@ -13,35 +13,50 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.Exception.DataNotFoundException;
+import com.example.category.model.Category;
+import com.example.category.repository.CategoryRepository;
 import com.example.question.model.BaseQuestion;
 import com.example.question.repository.QuestionRouter;
 import com.example.question.service.factory.QuestionFactory;
 import com.example.user.model.SiteUser;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
 
     private final Map<String, QuestionFactory> factories; // tenantId → Factory 매핑
     private final QuestionRouter questionRouter;          // Repository 라우터
+    private final CategoryRepository categoryRepository;
 
-    public Page<? extends BaseQuestion> getList(int page, String tenantId) {
-        List<Sort.Order> sorts = List.of(Sort.Order.desc("createDate"));
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
-        return questionRouter.resolve(tenantId).findAll(pageable);
+    public Page<? extends BaseQuestion> getList(int page, String filter, String tenantId) {
+        Pageable pageable = PageRequest.of(page, 10);
+
+        return switch (filter) {
+            case "answer" -> factories.get(tenantId).getListOrderByLatestAnswer(pageable);
+            case "comment" -> factories.get(tenantId).getListOrderByLatestComment(pageable);
+            default -> factories.get(tenantId).getListOrderByLatestQuestion(pageable);
+        };
     }
 
     public BaseQuestion getQuestion(Long id, String tenantId) {
-        return questionRouter.resolve(tenantId).findById(id)
-            .orElseThrow(() -> new DataNotFoundException("question not found"));
+    	BaseQuestion question = questionRouter.resolve(tenantId).findById(id)
+    	        .orElseThrow(() -> new DataNotFoundException("question not found"));
+
+    	    question.setViewCount(question.getViewCount() + 1);
+    	    questionRouter.resolve(tenantId).save(question);
+
+    	    return question;
     }
 
     public BaseQuestion create(String subject, String content,
-                               String keyword, String hashtag,
+                               String keyword, String hashtag, Long categoryId,
                                String tenantId, SiteUser user) {
-        return factories.get(tenantId).create(subject, content, keyword, hashtag, tenantId, user);
+    	Optional<Category> category = categoryRepository.findById(categoryId);
+        return factories.get(tenantId).create(subject, content, keyword, hashtag, category.get(), tenantId, user);
     }
 
     public void modify(BaseQuestion question, String subject,
@@ -59,7 +74,13 @@ public class QuestionService {
     }
 
     public Page<? extends BaseQuestion> search(String subject, String value, String tenantId, int page) {
+
         Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Order.desc("createDate")));
         return factories.get(tenantId).search(subject, value, pageable);
+    }
+    
+    public Page<? extends BaseQuestion> getUserQuestions(String username, int page, String tenantId) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Order.desc("createDate")));
+        return factories.get(tenantId).getUserQuestions(username, pageable);
     }
 }

@@ -4,6 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.Exception.DataNotFoundException;
@@ -52,12 +56,26 @@ public class AnswerService {
         this.answerRepository.save(answer);
     }
 
-    public List<Answer> getAnswersByQuestion(Long questionId, String customerId) {
-        QuestionType type = QuestionType.valueOf(customerId); // "A" → QuestionType.A
-        return answerRepository.findByQuestionIdAndQuestionType(questionId, type); // ✅ Enum 넘김
+    public Page<Answer> getAnswersByQuestion(Long questionId, String customerId, int page, String sort) {
+    	QuestionType type = QuestionType.valueOf(customerId); // "A" or "B"
+    	Pageable pageable = PageRequest.of(page, 10);
+
+    	if ("recommend".equalsIgnoreCase(sort)) {
+    			return answerRepository.findRecommendedAnswers(questionId, type, pageable);
+    	} else {
+    			return answerRepository.findByQuestionIdAndQuestionTypeOrderByCreateDateDesc(questionId, type, pageable);
+    	}
     }
+
+
+    
     public Integer countByQuestion(Long questionId, QuestionType questionType) {
         return answerRepository.countByQuestionIdAndQuestionType(questionId, questionType);
+    }
+    
+    public Page<Answer> getUserAnswers(String username, int page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Order.desc("createDate")));
+        return answerRepository.findByAuthorUsername(username, pageable);
     }
 
 }
