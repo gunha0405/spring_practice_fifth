@@ -9,6 +9,6 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - mssql-data:/var/opt/mssql
+      - ./mssql_backups:/var/opt/mssql/backups
 volumes:
   mssql-data:
