@@ -18,11 +18,15 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
 }
 
 repositories {
 	mavenCentral()
 }
+
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -34,7 +38,10 @@ dependencies {
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     implementation 'org.springframework.boot:spring-boot-starter-mail:3.5.5'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	runtimeOnly 'com.h2database:h2'
+    implementation 'org.quartz-scheduler:quartz:2.3.2'
+    implementation 'com.microsoft.sqlserver:mssql-jdbc:12.8.1.jre11'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
