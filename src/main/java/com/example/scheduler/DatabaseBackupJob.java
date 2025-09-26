@@ -29,14 +29,14 @@ public class DatabaseBackupJob implements Job {
         String sql = "BACKUP DATABASE myappdb_kor TO DISK = ? WITH INIT, STATS = 10";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, backupPath);
             ps.execute();
             System.out.println("MSSQL 백업 완료: " + backupPath);
 
         } catch (Exception e) {
-            throw new JobExecutionException("❌ DB 백업 실패", e);
+            throw new JobExecutionException("DB 백업 실패", e);
         }
     }
 }

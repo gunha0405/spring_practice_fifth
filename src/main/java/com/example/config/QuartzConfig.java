@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.example.scheduler.DatabaseBackupJob;
+import com.example.scheduler.LogArchiveJob;
+import com.example.scheduler.LogCleanupJob;
 import com.example.scheduler.MailSendJob;
 import com.example.scheduler.QuestionInsertJob;
 
@@ -73,4 +75,38 @@ public class QuartzConfig {
                 .build();
     }
 
+    @Bean
+    public JobDetail logArchiveJobDetail() {
+        return JobBuilder.newJob(LogArchiveJob.class)
+                .withIdentity("logArchiveJob", "systemTasks")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger logArchiveJobTrigger(@Qualifier("logArchiveJobDetail") JobDetail jobDetail) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .withIdentity("logArchiveTrigger", "systemTasks")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 5 * * ?"))
+                .build();
+    }
+    
+    @Bean
+    public JobDetail logCleanupJobDetail() {
+        return JobBuilder.newJob(LogCleanupJob.class)
+                .withIdentity("logCleanupJob", "systemTasks")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger logCleanupJobTrigger(@Qualifier("logCleanupJobDetail") JobDetail jobDetail) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .withIdentity("logCleanupTrigger", "systemTasks")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 4 ? * 1"))
+                .build();
+    }
+    
 }
