@@ -15,7 +15,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.excel.dto.QuestionADto;
 import com.example.excel.mapper.ExcelRowMapper;
 
 public class ExcelParser {
