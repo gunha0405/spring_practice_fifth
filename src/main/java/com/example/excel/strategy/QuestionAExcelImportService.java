@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.category.model.Category;
 import com.example.category.repository.CategoryRepository;
 import com.example.excel.dto.QuestionADto;
+import com.example.excel.mapper.QuestionARowMapper;
 import com.example.excel.parser.ExcelParser;
 import com.example.excel.validator.QuestionAExcelValidator;
 import com.example.question.model.QuestionA;
@@ -21,24 +22,36 @@ import lombok.RequiredArgsConstructor;
 
 @Service("questionAExcelImport")
 @RequiredArgsConstructor
-public class QuestionAExcelImportService implements ExcelImportStrategy{
-	
-	private final QuestionARepository questionARepository;
-	private final UserRepository userRepository;
-	private final CategoryRepository categoryRepository;
-	private final QuestionAExcelValidator validator;
-	
-	@Override
-	public void importExcel(MultipartFile file) throws IOException {
-		List<QuestionADto> dtos = ExcelParser.parseQuestionA(file);
-		
-		for (QuestionADto dto : dtos) {
-			validator.validate(dto);
-			
-			SiteUser user = userRepository.findByEmail(dto.getAuthorEmail()).orElseThrow(() -> new IllegalArgumentException("작성자 없음"));
-			
-			Category category = categoryRepository.findByName(dto.getCategoryName()).orElseThrow(() -> new IllegalArgumentException("카테고리 없음"));
-			
+public class QuestionAExcelImportService implements ExcelImportStrategy {
+
+    private final QuestionARepository questionARepository;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
+    private final QuestionAExcelValidator validator;
+
+    @Override
+    public void importExcel(MultipartFile file) throws IOException {
+        
+        List<String> expectedHeaders = List.of(
+            "subject", "content", "keyword", "tenantid", "authoremail", "categoryname"
+        );
+
+        
+        List<QuestionADto> dtos = ExcelParser.parse(
+            file,
+            expectedHeaders,
+            new QuestionARowMapper()
+        );
+
+        for (QuestionADto dto : dtos) {
+            validator.validate(dto);
+
+            SiteUser user = userRepository.findByEmail(dto.getAuthorEmail())
+                .orElseThrow(() -> new IllegalArgumentException("작성자 없음: " + dto.getAuthorEmail()));
+
+            Category category = categoryRepository.findByName(dto.getCategoryName())
+                .orElseThrow(() -> new IllegalArgumentException("카테고리 없음: " + dto.getCategoryName()));
+
             QuestionA entity = new QuestionA();
             entity.setSubject(dto.getSubject());
             entity.setContent(dto.getContent());
@@ -49,7 +62,6 @@ public class QuestionAExcelImportService implements ExcelImportStrategy{
             entity.setCategory(category);
 
             questionARepository.save(entity);
-		}
-	}
-	
+        }
+    }
 }
