@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Excel Import</title>
+</head>
+<body>
+    <h1>Excel Import</h1>
+
+    <form th:action="@{/excel/import}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">업로드</button>
+    </form>
+
+    <p th:if="${message}" th:text="${message}"></p>
+</body>
+</html>
