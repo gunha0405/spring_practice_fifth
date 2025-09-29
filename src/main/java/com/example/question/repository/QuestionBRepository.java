@@ -33,21 +33,27 @@ public interface QuestionBRepository extends JpaRepository<QuestionB, Long> {
     Page<QuestionB> findAllByOrderByCreateDateDesc(Pageable pageable);
 
 
-    @Query(value = "SELECT q.* " +
+    @Query(value = "SELECT q.id, q.subject, q.content, q.create_date, q.modify_date, q.hashtag, " +
+            "q.tenant_id, q.view_count, q.author_id, q.category_id " +
             "FROM questionB q " +
             "LEFT JOIN answer a ON q.id = a.question_id AND a.question_type = 'B' " +
-            "GROUP BY q.id " +
+            "GROUP BY q.id, q.subject, q.content, q.create_date, q.modify_date, " +
+            "q.hashtag, q.tenant_id, q.view_count, q.author_id, q.category_id " +
             "ORDER BY MAX(a.create_date) DESC",
-            countQuery = "SELECT COUNT(*) FROM question_b",
-            nativeQuery = true)
+    countQuery = "SELECT COUNT(*) FROM questionB",
+    nativeQuery = true)
     Page<QuestionB> findAllOrderByLatestAnswer(Pageable pageable);
 
-    @Query(value = "SELECT q.* " +
+    @Query(value = "SELECT q.id, q.subject, q.content, q.create_date, q.modify_date, q.hashtag, " +
+            "q.tenant_id, q.view_count, q.author_id, q.category_id " +
             "FROM questionB q " +
             "LEFT JOIN comment c ON q.id = c.questionB_id " +
-            "GROUP BY q.id " +
+            "GROUP BY q.id, q.subject, q.content, q.create_date, q.modify_date, " +
+            "q.hashtag, q.tenant_id, q.view_count, q.author_id, q.category_id " +
             "ORDER BY MAX(c.create_date) DESC",
-            countQuery = "SELECT COUNT(*) FROM questionB",
-            nativeQuery = true)
-	Page<QuestionB> findAllOrderByLatestComment(Pageable pageable);
+    countQuery = "SELECT COUNT(*) FROM questionB",
+    nativeQuery = true)
+    Page<QuestionB> findAllOrderByLatestComment(Pageable pageable);
+
+
 }

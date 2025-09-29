@@ -32,25 +32,30 @@ public interface QuestionARepository extends JpaRepository<QuestionA, Long> {
     Page<QuestionA> findAllByOrderByCreateDateDesc(Pageable pageable);
 
 
- 
-    @Query(value = "SELECT q.* " +
-                   "FROM questionA q " +
-                   "LEFT JOIN answer a ON q.id = a.question_id AND a.question_type = 'A' " +
-                   "GROUP BY q.id " +
-                   "ORDER BY MAX(a.create_date) DESC",
-           countQuery = "SELECT COUNT(*) FROM question_a",
-           nativeQuery = true)
+    @Query(value = "SELECT q.id, q.subject, q.content, q.create_date, q.modify_date, q.keyword, " +
+            "q.tenant_id, q.view_count, q.author_id, q.category_id " +
+            "FROM questionA q " +
+            "LEFT JOIN answer a ON q.id = a.question_id AND a.question_type = 'A' " +
+            "GROUP BY q.id, q.subject, q.content, q.create_date, q.modify_date, " +
+            "q.keyword, q.tenant_id, q.view_count, q.author_id, q.category_id " +
+            "ORDER BY MAX(a.create_date) DESC",
+    countQuery = "SELECT COUNT(*) FROM questionA",
+    nativeQuery = true)
     Page<QuestionA> findAllOrderByLatestAnswer(Pageable pageable);
 
-
-    @Query(value = "SELECT q.* " +
-                   "FROM questionA q " +
-                   "LEFT JOIN comment c ON q.id = c.questionA_id " +
-                   "GROUP BY q.id " +
-                   "ORDER BY MAX(c.create_date) DESC",
-           countQuery = "SELECT COUNT(*) FROM questionA",
-           nativeQuery = true)
+    @Query(value = "SELECT q.id, q.subject, q.content, q.create_date, q.modify_date, q.keyword, " +
+            "q.tenant_id, q.view_count, q.author_id, q.category_id " +
+            "FROM questionA q " +
+            "LEFT JOIN comment c ON q.id = c.questionA_id " +
+            "GROUP BY q.id, q.subject, q.content, q.create_date, q.modify_date, " +
+            "q.keyword, q.tenant_id, q.view_count, q.author_id, q.category_id " +
+            "ORDER BY MAX(c.create_date) DESC",
+    countQuery = "SELECT COUNT(*) FROM questionA",
+    nativeQuery = true)
     Page<QuestionA> findAllOrderByLatestComment(Pageable pageable);
+
+
+
     
 }
 
