@@ -1,5 +1,6 @@
 package com.example.excel.parser;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ public class ExcelParser {
         }
         return rows;
     }
+    
 
     private static Map<String, Integer> validateHeaders(Sheet sheet, List<String> expectedHeaders) {
         Row headerRow = sheet.getRow(0);
@@ -69,4 +71,24 @@ public class ExcelParser {
             default -> cell.toString().trim();
         };
     }
+    
+    public static <T> List<T> parse(File file,
+        List<String> expectedHeaders,
+        ExcelRowMapper<T> mapper) throws IOException {
+    	List<T> rows = new ArrayList<>();
+
+    	try (Workbook workbook = WorkbookFactory.create(file)) {
+    		Sheet sheet = workbook.getSheetAt(0);
+
+    		Map<String, Integer> headerIndex = validateHeaders(sheet, expectedHeaders);
+
+    		for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+    			Row row = sheet.getRow(i);
+    			if (row == null) continue;
+    			rows.add(mapper.mapRow(row, headerIndex));
+    		}
+    	}
+    	return rows;
+    }
+
 }

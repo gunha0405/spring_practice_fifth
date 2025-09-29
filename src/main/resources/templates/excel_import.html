@@ -6,11 +6,26 @@
 <body>
     <h1>Excel Import</h1>
 
+    <!-- 기존: 서비스 방식 -->
+    <h2>Service 방식 Import</h2>
     <form th:action="@{/excel/import}" method="post" enctype="multipart/form-data">
         <input type="file" name="file" required>
         <button type="submit">업로드</button>
     </form>
 
+    <!-- 새로 추가: Batch 방식 -->
+    <h2>Batch 방식 Import</h2>
+    <form th:action="@{/excel/batch/import/questionA}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Batch 업로드 (QuestionA)</button>
+    </form>
+
+    <form th:action="@{/excel/batch/import/questionB}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Batch 업로드 (QuestionB)</button>
+    </form>
+
+    <!-- 메시지 출력 -->
     <p th:if="${message}" th:text="${message}"></p>
 </body>
 </html>
