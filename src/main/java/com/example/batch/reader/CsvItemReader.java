@@ -1,6 +1,7 @@
 package com.example.batch.reader;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,27 +16,41 @@ import com.example.excel.mapper.CsvRowMapper;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class CsvItemReader<T> implements ItemReader<T> {
-	private final Iterator<T> iterator;
-	
-	public CsvItemReader(File file, CsvRowMapper<T> mapper) throws IOException {
-		List<T> dataList = new ArrayList<>();
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-			String headerLine = br.readLine();
-			String[] headers = headerLine.split(",");
-			
-			String line;
-			while ((line = br.readLine()) != null) {
-				String[] values = line.split(",");
-				dataList.add(mapper.mapRow(headers, values));
-			}
-			
-		}
-		this.iterator = dataList.iterator();
-	}
-	
-	@Override
-	public T read() {
-		return iterator.hasNext() ? iterator.next() : null;
-	}
+public class CsvItemReader<T> implements ItemReader<T>, Closeable {
+    private final BufferedReader br;
+    private final CsvRowMapper<T> mapper;
+
+    private String[] headers;
+    private boolean headerRead = false;
+
+    public CsvItemReader(File file, CsvRowMapper<T> mapper) throws IOException {
+        this.br = new BufferedReader(new FileReader(file));
+        this.mapper = mapper;
+    }
+
+    @Override
+    public T read() throws IOException {
+        if (!headerRead) {
+            String headerLine = br.readLine();
+            if (headerLine == null) {
+                return null;
+            }
+            headers = headerLine.split(",");
+            headerRead = true;
+        }
+
+        String line = br.readLine();
+        if (line == null) {
+            return null;
+        }
+
+        String[] values = line.split(",");
+        return mapper.mapRow(headers, values);
+    }
+
+    @Override
+    public void close() throws IOException {
+        br.close();
+    }
 }
+
