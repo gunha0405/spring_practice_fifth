@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.converter.FileConverterFactory;
 import com.example.excel.router.ExcelImportRouter;
 import com.example.user.model.CustomUserDetails;
 
@@ -28,6 +29,7 @@ public class ExcelController {
 	private final ExcelImportRouter router;
 	private final JobLauncher jobLauncher;
     private final Job questionAExcelImportJob;
+    private final FileConverterFactory fileConverterFactory;
 	
 	@GetMapping("/import")
     public String excelUploadForm() {
@@ -55,13 +57,12 @@ public class ExcelController {
     @PostMapping("/batch/import/questionA")
     public String importQuestionA(@RequestParam("file") MultipartFile file, Model model) {
         try {
-            
-            String tempFilePath = System.getProperty("java.io.tmpdir") + "/" + file.getOriginalFilename();
-            file.transferTo(new File(tempFilePath));
+            // XLSX → CSV 변환 (혹은 다른 포맷 변환)
+            File convertedFile = fileConverterFactory.convert(file);
 
             JobParameters params = new JobParametersBuilder()
-                    .addString("filePath", tempFilePath)   // Reader에 전달
-                    .addLong("timestamp", System.currentTimeMillis()) // 중복 실행 방지
+                    .addString("filePath", convertedFile.getAbsolutePath()) // 변환된 CSV 경로 전달
+                    .addLong("timestamp", System.currentTimeMillis())       // 중복 실행 방지
                     .toJobParameters();
 
             jobLauncher.run(questionAExcelImportJob, params);
@@ -71,6 +72,7 @@ public class ExcelController {
         }
         return "excel_import";
     }
+
 
 
 	
